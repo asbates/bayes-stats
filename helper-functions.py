@@ -15,11 +15,11 @@ find_beta() computes the hyperparameters for a Beta(a,b) prior
  given the mode and a percentile
 '''
 
-def find_beta(mode, percentile, prob = 0.95, b_start = 1, b_end = 100, b_length = 1000):
+def find_beta(mode, percentile, p = 0.95, b_start = 1, b_end = 100, b_length = 1000):
 
     b = np.linspace(b_start, b_end, num = b_length)
     a = ( 1 + mode * (b - 2) ) / (1 - mode)
-    q  = stats.beta.ppf(prob, a, b)
+    q  = stats.beta.ppf(p, a, b)
     indx = np.argmax(q < percentile)
     return np.array([a[indx], b[indx]])
 
@@ -37,6 +37,7 @@ bayes_summary() computes summary statistics and and HPD interval
 '''
 
 def bayes_summary(sample, p = 0.95):
+    
     df = pd.DataFrame(sample)
     stat_sum = df.describe()['mean' : 'max']
     hpd = pm.stats.hpd(sample, alpha = 1 - p)
@@ -55,3 +56,39 @@ Example usage:
 post_sample = stats.norm.rvs(size = 100)
 bayes_summary(post_sample)
 '''
+
+
+'''
+find_normal() computes the hyperparameters for a normal prior
+ given the prior mean and a percentile
+'''
+
+def find_normal(mean, percentile, p = 0.95):
+    
+    sd =  (percentile - mean) / stats.norm.ppf(p) 
+    precision = 1 / (sd ** 2)
+    params = pd.DataFrame({'mean': [mean], 'sd': [sd], 'precision': [precision]})
+    return params
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
