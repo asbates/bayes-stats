@@ -1,5 +1,4 @@
 """
-Created on Wed Feb 14 16:35:54 2018
 
 @author: andrewbates
 """
@@ -21,7 +20,16 @@ def find_beta(mode, percentile, p = 0.95, b_start = 1, b_end = 100, b_length = 1
     a = ( 1 + mode * (b - 2) ) / (1 - mode)
     q  = stats.beta.ppf(p, a, b)
     indx = np.argmax(q < percentile)
-    return np.array([a[indx], b[indx]])
+    out =  pd.DataFrame({'a': [a[indx]] , 'b': [b[indx]] })
+    return out
+
+'''
+note: this is another way using the index argument which is basically rownames in R  
+out =  pd.DataFrame(data = [ a[indx], b[indx] ], index = ['a', 'b'])
+    out = out.transpose()
+    return out    
+'''
+
 
 '''
 Example usage:
@@ -30,6 +38,23 @@ Your expert says the most likely value for p is 0.1 and they are 95% certain p i
 To find the parameters a,b to capture this information, use
 find_beta(mode = 0.1, percentile = 0.25)
 '''
+
+
+
+'''
+find_normal() computes the hyperparameters for a normal prior
+ given the prior mean and a percentile
+'''
+
+def find_normal(mean, percentile, p = 0.95):
+    
+    sd =  (percentile - mean) / stats.norm.ppf(p) 
+    precision = 1 / (sd ** 2)
+    params = pd.DataFrame({'mean': [mean], 'sd': [sd], 'precision': [precision]})
+    return params
+    
+
+
 
 '''
 bayes_summary() computes summary statistics and and HPD interval 
@@ -58,18 +83,6 @@ bayes_summary(post_sample)
 '''
 
 
-'''
-find_normal() computes the hyperparameters for a normal prior
- given the prior mean and a percentile
-'''
-
-def find_normal(mean, percentile, p = 0.95):
-    
-    sd =  (percentile - mean) / stats.norm.ppf(p) 
-    precision = 1 / (sd ** 2)
-    params = pd.DataFrame({'mean': [mean], 'sd': [sd], 'precision': [precision]})
-    return params
-    
 
 
 
